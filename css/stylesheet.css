@@ -43,6 +43,7 @@ p {
 }
 
 .logo img {
+	
 	width: 225px; /* Change image size for mobile */
 	-webkit-animation-name: logo;
 	        animation-name: logo;
@@ -54,17 +55,19 @@ p {
 	        animation-timing-function: ease-in-out;
 }
 
-
 @-webkit-keyframes logo {
 	0% {
+		opacity: 0.5;
 		-webkit-transform: scale(1);
 		        transform: scale(1);
 	}
 	50% {
+		opacity: 1;
 		-webkit-transform: scale(1.07);
 		        transform: scale(1.07);
 	}
 	100% {
+		opacity: 0.5;
 		-webkit-transform: scale(1);
 		        transform: scale(1);
 	}
@@ -72,37 +75,20 @@ p {
 
 @keyframes logo {
 	0% {
+		opacity: 0.5;
 		-webkit-transform: scale(1);
 		        transform: scale(1);
 	}
 	50% {
+		opacity: 1;
 		-webkit-transform: scale(1.07);
 		        transform: scale(1.07);
 	}
 	100% {
+		opacity: 0.5;
 		-webkit-transform: scale(1);
 		        transform: scale(1);
 	}
-}
-
-.playercount {
-	display: inline-block;
-	margin: 20px 15px 0 15px;
-	padding: 2px 0;
-	background-color: rgba(255, 130, 255, 0.75);
-	font-size: 1em;
-	color: white;
-	text-align: center;
-	border-radius: 5px 0 5px 0;
-	line-height: 27px;
-}
-
-.playercount > p > span {
-	font-weight: bold;
-	padding: 1px 4px;
-	border-radius: 3px;
-	background: rgba(164, 0, 197, 0.7);
-	margin: 0 2px;
 }
 
 .extrapad {
@@ -126,16 +112,16 @@ p {
 }
 
 .item img {
-	-webkit-transition: all 0.2s ease;
-	-o-transition: all 0.2s ease;
-	transition: all 0.2s ease;
-	margin-bottom: 7px;
+	-webkit-transition: all 0.5s ease;
+	-o-transition: all 0.5s ease;
+	transition: all 0.5s ease;
+	margin-bottom: 2px;
 }
 
 .item img:hover {
-	-webkit-transform:scale(1.1);
-	    -ms-transform:scale(1.1);
-	        transform:scale(1.1);
+	-webkit-transform:scale(1.15) rotate(15deg);;
+	    -ms-transform:scale(1.15) rotate(15deg);;
+	        transform:scale(1.15) rotate(15deg);;
 }
 
 .img {
@@ -162,16 +148,7 @@ p {
 
 @media(min-width: 400px) {
 	.logo img {
-		width: 280px; /* Change image size for mid sized devices */
-	}
-
-	.playercount {
-		margin-top: 30px;
-		padding: 5px;
-	}
-
-	.playercount > p > span {
-		padding: 2px 7px;
+		width: 500px; /* Change image size for mid sized devices */
 	}
 }
 
@@ -185,7 +162,7 @@ p {
 	}
 
 	.logo img {
-		width: 470px; /* Change image size for desktop */
+		width: 650px; /* Change image size for desktop */
 	}
 
 	.logo {
@@ -195,7 +172,7 @@ p {
 		width: 100%;
 	}
 	.items {
-		padding: 30px 0 20px 0;
+		padding: 15px 0 20px 0;
 	}
 	.playercount {
 		font-size: 1.22em;
@@ -204,10 +181,6 @@ p {
 
 	.extrapad {
 		padding: 0 42.5px;
-	}
-
-	.playercount > p > span {
-		padding: 4px 7px;
 	}
 }
 

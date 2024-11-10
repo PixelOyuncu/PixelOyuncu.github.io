@@ -116,6 +116,7 @@ p {
 	-o-transition: all 0.5s ease;
 	transition: all 0.5s ease;
 	margin-bottom: 2px;
+	border-radius: 10px;
 }
 
 .item img:hover {

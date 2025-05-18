@@ -217,6 +217,8 @@ select {
 	flex-direction: column;
 	min-width: 200px;
 	min-height: 150px;
+	/* Ensure proper height calculation */
+	box-sizing: border-box;
 }
 
 /* Inactive window styling */
@@ -398,6 +400,7 @@ select {
 	justify-content: flex-end;
 	flex-shrink: 0;
 	/* Prevent header from shrinking */
+	box-sizing: border-box;
 }
 
 /* Remove border radius from header when maximized */
@@ -479,8 +482,10 @@ select {
 	color: #202020;
 	flex: 1;
 	/* Take up remaining space */
-	overflow: auto;
-	/* Add scrollbars when content overflows */
+	overflow-y: auto;
+	/* Enable vertical scrolling */
+	overflow-x: hidden;
+	/* Prevent horizontal overflow */
 	word-wrap: break-word;
 	/* Break long words */
 	overflow-wrap: break-word;
@@ -489,6 +494,9 @@ select {
 	/* Include padding in size calculations */
 	min-height: 0;
 	/* Allow shrinking below natural content height */
+	/* Ensure content fills available space properly */
+	height: calc(100% - 48px);
+	/* Subtract header height */
 }
 
 /* Remove border radius from content when maximized */
@@ -519,6 +527,54 @@ select {
 	white-space: pre-wrap;
 	word-break: break-all;
 	overflow-wrap: break-word;
+}
+
+/* Additional styling for better text flow */
+.wincontent p {
+	margin-bottom: 12px;
+	line-height: 1.5;
+	text-align: justify;
+	hyphens: auto;
+	word-break: break-word;
+}
+
+.wincontent a {
+	color: #0067c0;
+	text-decoration: none;
+	word-break: break-all;
+}
+
+.wincontent a:hover {
+	text-decoration: underline;
+}
+
+/* Ensure bold text doesn't cause overflow */
+.wincontent b,
+.wincontent strong {
+	font-weight: 600;
+	word-break: break-word;
+}
+
+/* Custom scrollbar styling for Windows 11 look */
+.wincontent::-webkit-scrollbar {
+	width: 14px;
+}
+
+.wincontent::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.05);
+	border-radius: 7px;
+}
+
+.wincontent::-webkit-scrollbar-thumb {
+	background: rgba(0, 0, 0, 0.3);
+	border-radius: 7px;
+	border: 2px solid transparent;
+	background-clip: padding-box;
+}
+
+.wincontent::-webkit-scrollbar-thumb:hover {
+	background: rgba(0, 0, 0, 0.5);
+	background-clip: padding-box;
 }
 
 /* Windows 11 style taskbar */

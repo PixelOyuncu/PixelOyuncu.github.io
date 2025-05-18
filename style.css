@@ -375,6 +375,7 @@ select {
 
 .window.closed {
 	display: none;
+	overflow: hidden;
 }
 
 .fullSizeWindow .ui-resizable-handle {
@@ -497,6 +498,10 @@ select {
 /* Remove border radius from content when maximized */
 .fullSizeWindow .wincontent {
 	border-radius: 0;
+	overflow-y: auto;
+    overflow-x: hidden;
+    height: calc(100% - 48px);
+    min-height: 0;
 }
 
 /* Ensure all content inside respects word wrapping */

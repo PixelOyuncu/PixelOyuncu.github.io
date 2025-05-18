@@ -194,6 +194,14 @@ $(function () {
 
 			$('#taskbar .taskbarPanel').removeClass('activeTab');
 			$('#taskbar .taskbarPanel').eq(id).removeClass('closed minimizedTab').addClass('activeTab');
+
+			// --- Overflow/scrollbar patch: recalc wincontent height on open ---
+			const content = win.find('.wincontent');
+			content.css('height', 'auto'); // Reset first
+			// Force reflow
+			void content[0].offsetHeight;
+			content.css('height', 'calc(100% - 48px)');
+			// ---------------------------------------------------------------
 		}
 	});
 
@@ -247,34 +255,4 @@ $(function () {
 			$(this).trigger('click');
 		});
 	});
-
-	win.show().removeClass('closing minimizedWindow closed').addClass('opening');
-	$('.window').removeClass('activeWindow');
-	win.addClass('activeWindow');
-	$('#taskbar .taskbarPanel').removeClass('activeTab');
-	tab.removeClass('minimizedTab closed').addClass('activeTab');
-
-	// Force z-index update for active window
-	$('.window').css('z-index', 1000);
-	win.css('z-index', 1001);
-
-	// Force layout recalculation for overflow fix
-	win.find('.wincontent').css('height', 'calc(100% - 48px)').get(0).offsetHeight;
-
-	win.one('animationend', function () {
-		win.removeClass('opening');
-	});
-
-	win.show().removeClass('closing minimizedWindow closed').addClass('opening');
-	// --- Add these lines to fix overflow/scrollbar issue ---
-	const content = win.find('.wincontent');
-	content.css('height', 'auto'); // Reset first
-	// Force reflow
-	void content[0].offsetHeight;
-	content.css('height', 'calc(100% - 48px)');
-	// -------------------------------------------------------
-	$('.window').removeClass('activeWindow');
-	win.addClass('activeWindow');
-	$('#taskbar .taskbarPanel').removeClass('activeTab');
-	tab.removeClass('minimizedTab closed').addClass('activeTab');
 });

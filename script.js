@@ -140,6 +140,14 @@ $(function () {
 				$('.window').css('z-index', 1000);
 				win.css('z-index', 1001);
 
+				// --- Overflow/scrollbar patch: recalc wincontent height on open ---
+				const content = win.find('.wincontent');
+				content.css('height', 'auto'); // Reset first
+				// Force reflow
+				void content[0].offsetHeight;
+				content.css('height', 'calc(100% - 48px)');
+				// ---------------------------------------------------------------
+
 				win.one('animationend', function () {
 					win.removeClass('opening');
 				});

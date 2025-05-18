@@ -289,11 +289,6 @@ select {
 	/* Prevent content overflow */
 }
 
-.window.resizing .wincontent * {
-	transition: none;
-	/* Remove transitions from all child elements */
-}
-
 /* Animation keyframes */
 @keyframes close {
 	0% {

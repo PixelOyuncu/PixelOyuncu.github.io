@@ -3,7 +3,8 @@ $(function () {
 	const appIcons = {
 		'Welcome': 'https://img.icons8.com/?size=100&id=1H52efUsDX7A&format=png&color=000000',
 		'default': 'https://fileinfo.cn/upload/icon/202002/exe.png',
-		"Simple Tower Defense": "https://s6.imgcdn.dev/Y6P17i.png"
+		'Simple Tower Defense': "https://s6.imgcdn.dev/Y6P17i.png",
+		'Suggestions': "https://img.icons8.com/3d-fluency/100/comments.png"
 	};
 
 	// Desktop click handler - deactivate all windows when clicking on the desktop
@@ -243,7 +244,8 @@ $(function () {
 	// Create desktop shortcuts with proper Windows 11 style
 	const shortcuts = [
 		{ id: 0, title: 'Welcome' },
-		{ id: 1, title: 'Simple Tower Defense' }
+		{ id: 1, title: 'Simple Tower Defense' },
+		{ id: 2, title: 'Suggestions' }
 	];
 
 	shortcuts.forEach(shortcut => {
@@ -262,5 +264,111 @@ $(function () {
 		shortcutEl.on('dblclick', function () {
 			$(this).trigger('click');
 		});
+	});
+
+	// --- Comment System for Suggestions window ---
+	function loadComments() {
+		const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+		return comments;
+	}
+
+	function saveComments(comments) {
+		localStorage.setItem('comments', JSON.stringify(comments));
+	}
+
+	function renderComments() {
+		const comments = loadComments();
+		const $list = $('#comments-list');
+		$list.empty();
+		if (comments.length === 0) {
+			$list.append('<div class="no-comments">No comments yet.</div>');
+			return;
+		}
+		comments.forEach((c, idx) => {
+			const $c = $(`
+				<div class="comment">
+					<div class="comment-header">
+						<span class="comment-username"></span>
+						<button class="upvote-btn" data-idx="${idx}">▲ ${c.upvotes || 0}</button>
+					</div>
+					<div class="comment-body"></div>
+				</div>
+			`);
+			$c.find('.comment-username').text(c.username || 'Anonymous');
+			$c.find('.comment-body').text(c.text);
+			$list.append($c);
+		});
+	}
+
+	$(document).on('click', '#comment-submit', function () {
+		const username = $('#comment-username').val().trim() || 'Anonymous';
+		const text = $('#comment-text').val().trim();
+		if (!text) return;
+		const comments = loadComments();
+		comments.push({ username, text, upvotes: 0 });
+		saveComments(comments);
+		renderComments();
+		$('#comment-text').val('');
+	});
+
+	$(document).on('click', '.upvote-btn', function () {
+		const idx = $(this).data('idx');
+		const comments = loadComments();
+		if (typeof idx === 'number' && comments[idx]) {
+			comments[idx].upvotes = (comments[idx].upvotes || 0) + 1;
+			saveComments(comments);
+			renderComments();
+		}
+	});
+
+	// Render comments when Suggestions window is opened
+	function setupSuggestionsCommentRender() {
+		const suggestionsWin = $('.window[data-title="Suggestions"]');
+		if (suggestionsWin.length) {
+			renderComments();
+		}
+	}
+	setupSuggestionsCommentRender();
+
+	$(document).on('click', '.openWindow', function (e) {
+		// Stop propagation to prevent desktop click handler from firing
+		e.stopPropagation();
+
+		const id = $(this).data('id');
+		const win = $('#window' + id);
+
+		if (!win.is(':visible')) {
+			// Hide any animation classes
+			win.show().removeClass('closing minimizedWindow minimizing closed').addClass('opening');
+
+			// Set as active window
+			$('.window').removeClass('activeWindow');
+			win.addClass('activeWindow');
+
+			// Force z-index update for active window
+			$('.window').css('z-index', 1000);
+			win.css('z-index', 1001);
+
+			// Animate and update taskbar
+			win.one('animationend', function () {
+				win.removeClass('opening');
+			});
+
+			$('#taskbar .taskbarPanel').removeClass('activeTab');
+			$('#taskbar .taskbarPanel').eq(id).removeClass('closed minimizedTab').addClass('activeTab');
+
+			// --- Overflow/scrollbar patch: recalc wincontent height on open ---
+			const content = win.find('.wincontent');
+			content.css('height', 'auto'); // Reset first
+			// Force reflow
+			void content[0].offsetHeight;
+			content.css('height', 'calc(100% - 48px)');
+			// ---------------------------------------------------------------
+		}
+
+		// If Suggestions window is opened, render comments
+		if (win.data('title') === 'Suggestions') {
+			renderComments();
+		}
 	});
 });

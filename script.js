@@ -266,70 +266,69 @@ $(function () {
 		});
 	});
 
-	// --- Comment System for Suggestions window ---
-	function loadComments() {
-		const comments = JSON.parse(localStorage.getItem('comments') || '[]');
-		return comments;
+	// --- Suggestions window: Discord webhook + CAPTCHA ---
+	const DISCORD_WEBHOOK_URL = 'YOUR_DISCORD_WEBHOOK_URL_HERE'; // <-- Replace with your webhook
+
+	function generateCaptcha() {
+		const a = Math.floor(Math.random() * 10) + 1;
+		const b = Math.floor(Math.random() * 10) + 1;
+		$('#captcha-question').text(`What is ${a} + ${b}?`);
+		$('#captcha-answer').val('');
+		return a + b;
 	}
 
-	function saveComments(comments) {
-		localStorage.setItem('comments', JSON.stringify(comments));
-	}
-
-	function renderComments() {
-		const comments = loadComments();
-		const $list = $('#comments-list');
-		$list.empty();
-		if (comments.length === 0) {
-			$list.append('<div class="no-comments">No comments yet.</div>');
-			return;
-		}
-		comments.forEach((c, idx) => {
-			const $c = $(`
-				<div class="comment">
-					<div class="comment-header">
-						<span class="comment-username"></span>
-						<button class="upvote-btn" data-idx="${idx}">▲ ${c.upvotes || 0}</button>
-					</div>
-					<div class="comment-body"></div>
-				</div>
-			`);
-			$c.find('.comment-username').text(c.username || 'Anonymous');
-			$c.find('.comment-body').text(c.text);
-			$list.append($c);
-		});
-	}
+	let captchaAnswer = generateCaptcha();
 
 	$(document).on('click', '#comment-submit', function () {
 		const username = $('#comment-username').val().trim() || 'Anonymous';
 		const text = $('#comment-text').val().trim();
-		if (!text) return;
-		const comments = loadComments();
-		comments.push({ username, text, upvotes: 0 });
-		saveComments(comments);
-		renderComments();
-		$('#comment-text').val('');
+		const captchaInput = $('#captcha-answer').val().trim();
+		const $status = $('#comment-status');
+		$status.text('');
+
+		if (!text) {
+			$status.text('Please enter a comment.');
+			return;
+		}
+		if (parseInt(captchaInput, 10) !== captchaAnswer) {
+			$status.text('Incorrect CAPTCHA answer.');
+			captchaAnswer = generateCaptcha();
+			return;
+		}
+
+		$status.text('Sending...');
+		$('#comment-submit').prop('disabled', true);
+
+		$.ajax({
+			url: DISCORD_WEBHOOK_URL,
+			method: 'POST',
+			contentType: 'application/json',
+			data: JSON.stringify({
+				username: 'Suggestion Bot',
+				embeds: [{
+					title: 'New Suggestion',
+					fields: [
+						{ name: 'User', value: username },
+						{ name: 'Comment', value: text }
+					],
+					timestamp: new Date().toISOString()
+				}]
+			}),
+			success: function () {
+				$status.text('Suggestion sent! Thank you.');
+				$('#comment-text').val('');
+				captchaAnswer = generateCaptcha();
+			},
+			error: function () {
+				$status.text('Failed to send. Please try again later.');
+			},
+			complete: function () {
+				$('#comment-submit').prop('disabled', false);
+			}
+		});
 	});
 
-	$(document).on('click', '.upvote-btn', function () {
-		const idx = $(this).data('idx');
-		const comments = loadComments();
-		if (typeof idx === 'number' && comments[idx]) {
-			comments[idx].upvotes = (comments[idx].upvotes || 0) + 1;
-			saveComments(comments);
-			renderComments();
-		}
-	});
-
-	// Render comments when Suggestions window is opened
-	function setupSuggestionsCommentRender() {
-		const suggestionsWin = $('.window[data-title="Suggestions"]');
-		if (suggestionsWin.length) {
-			renderComments();
-		}
-	}
-	setupSuggestionsCommentRender();
-
+	// Regenerate captcha when Suggestions window is opened
 	$(document).on('click', '.openWindow', function (e) {
 		// Stop propagation to prevent desktop click handler from firing
 		e.stopPropagation();
@@ -368,7 +367,8 @@ $(function () {
 
 		// If Suggestions window is opened, render comments
 		if (win.data('title') === 'Suggestions') {
-			renderComments();
+			captchaAnswer = generateCaptcha();
+			$('#comment-status').text('');
 		}
 	});
 });

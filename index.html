@@ -12,6 +12,9 @@
 	</script>
 	<script src="script.js">
 	</script>
+	<script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore-compat.js"></script>
+
 	<link href="style.css" rel="stylesheet" type="text/css">
 
 	<title>Pixelized Studios</title>
@@ -45,11 +48,13 @@
 				<div id="comment-form">
 					<input type="text" id="comment-username" placeholder="Your name" maxlength="20" />
 					<textarea id="comment-text" placeholder="Your comment" maxlength="300"></textarea>
+					<div id="captcha-container">
+						<span id="captcha-question"></span>
+						<input type="text" id="captcha-answer" placeholder="Answer" maxlength="6" style="width:60px;" />
+					</div>
 					<button id="comment-submit">Submit</button>
 				</div>
-				<div id="comments-list">
-					<!-- Comments will appear here -->
-				</div>
+				<div id="comment-status"></div>
 			</div>
 		</div>
 

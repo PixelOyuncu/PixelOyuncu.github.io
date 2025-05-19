@@ -16,9 +16,11 @@ $(function () {
 		}
 	});
 
-	// Clear taskbar first to prevent duplication
+	// Clear taskbar and icons first to prevent duplication
 	$('#taskbar').empty();
+	$('#icons').empty();
 
+	// Initialize windows
 	$('.window').each(function (i) {
 		const win = $(this);
 		win.attr('id', 'window' + i).data('id', i);
@@ -177,43 +179,7 @@ $(function () {
 		});
 	});
 
-	$(document).on('click', '.openWindow', function (e) {
-		// Stop propagation to prevent desktop click handler from firing
-		e.stopPropagation();
-
-		const id = $(this).data('id');
-		const win = $('#window' + id);
-
-		if (!win.is(':visible')) {
-			// Hide any animation classes
-			win.show().removeClass('closing minimizedWindow minimizing closed').addClass('opening');
-
-			// Set as active window
-			$('.window').removeClass('activeWindow');
-			win.addClass('activeWindow');
-
-			// Force z-index update for active window
-			$('.window').css('z-index', 1000);
-			win.css('z-index', 1001);
-
-			// Animate and update taskbar
-			win.one('animationend', function () {
-				win.removeClass('opening');
-			});
-
-			$('#taskbar .taskbarPanel').removeClass('activeTab');
-			$('#taskbar .taskbarPanel').eq(id).removeClass('closed minimizedTab').addClass('activeTab');
-
-			// --- Overflow/scrollbar patch: recalc wincontent height on open ---
-			const content = win.find('.wincontent');
-			content.css('height', 'auto'); // Reset first
-			// Force reflow
-			void content[0].offsetHeight;
-			content.css('height', 'calc(100% - 48px)');
-			// ---------------------------------------------------------------
-		}
-	});
-
+	// Window controls handlers
 	$(document).on('click', '.winmaximize', function (e) {
 		// Stop propagation to prevent desktop click handler from firing
 		e.stopPropagation();
@@ -238,9 +204,6 @@ $(function () {
 		});
 	});
 
-	// Modify the desktop icons part to create Windows 11 style icons
-	$('#icons').empty(); // Clear existing icons first
-
 	// Create desktop shortcuts with proper Windows 11 style
 	const shortcuts = [
 		{ id: 0, title: 'Welcome' },
@@ -260,175 +223,275 @@ $(function () {
 
 		$('#icons').append(shortcutEl);
 
-		// Add double-click behavior to match Windows
-		shortcutEl.on('dblclick', function () {
-			$(this).trigger('click');
+		// Add click and double-click behavior to match Windows
+		shortcutEl.on('click', function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$(this).trigger('openWindow');
+		});
+
+		shortcutEl.on('dblclick', function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$(this).trigger('openWindow');
+		});
+
+		// Custom openWindow event
+		shortcutEl.on('openWindow', function () {
+			const id = $(this).data('id');
+			const win = $('#window' + id);
+
+			if (!win.is(':visible')) {
+				// Hide any animation classes
+				win.show().removeClass('closing minimizedWindow minimizing closed').addClass('opening');
+
+				// Set as active window
+				$('.window').removeClass('activeWindow');
+				win.addClass('activeWindow');
+
+				// Force z-index update for active window
+				$('.window').css('z-index', 1000);
+				win.css('z-index', 1001);
+
+				// Animate and update taskbar
+				win.one('animationend', function () {
+					win.removeClass('opening');
+				});
+
+				$('#taskbar .taskbarPanel').removeClass('activeTab');
+				$('#taskbar .taskbarPanel').eq(id).removeClass('closed minimizedTab').addClass('activeTab');
+
+				// --- Overflow/scrollbar patch: recalc wincontent height on open ---
+				const content = win.find('.wincontent');
+				content.css('height', 'auto'); // Reset first
+				// Force reflow
+				void content[0].offsetHeight;
+				content.css('height', 'calc(100% - 48px)');
+				// ---------------------------------------------------------------
+
+				// If Suggestions window is opened, initialize the form
+				if (win.data('title') === 'Suggestions') {
+					initializeSuggestionsForm();
+				}
+			}
 		});
 	});
 
-	// --- Suggestions window: Discord webhook + reCAPTCHA ---
-	// 1. Add reCAPTCHA widget dynamically when Suggestions window is opened
-	// 2. On submit, verify reCAPTCHA before sending
-
-	// Replace this with your own reCAPTCHA site key
+	// reCAPTCHA functionality for Suggestions window
 	const RECAPTCHA_SITE_KEY = '6Le48T8rAAAAAKtlygFyFYawzMD5s07FSVgY7LGw';
+	let recaptchaLoaded = false;
+	let recaptchaWidgetId = null;
 
-	// Add reCAPTCHA widget when Suggestions window is opened
-	function renderRecaptcha() {
-		// Remove any previous widget to avoid "No reCAPTCHA clients exist" error
-		$('#recaptcha-container').empty();
-		// Wait until grecaptcha is loaded
-		function tryRender() {
-			if (typeof grecaptcha === 'undefined' || !grecaptcha.render) {
-				setTimeout(tryRender, 200);
-				return;
-			}
-			grecaptcha.render('recaptcha-container', {
-				sitekey: RECAPTCHA_SITE_KEY
-			});
-		}
-		tryRender();
+	// Load reCAPTCHA script
+	function loadRecaptcha() {
+		if (recaptchaLoaded) return;
+		
+		const script = document.createElement('script');
+		script.src = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit';
+		script.async = true;
+		script.defer = true;
+		document.head.appendChild(script);
+		recaptchaLoaded = true;
 	}
 
-	$(document).on('click', '.openWindow', function (e) {
-		// Stop propagation to prevent desktop click handler from firing
-		e.stopPropagation();
-
-		const id = $(this).data('id');
-		const win = $('#window' + id);
-
-		if (!win.is(':visible')) {
-			// Hide any animation classes
-			win.show().removeClass('closing minimizedWindow minimizing closed').addClass('opening');
-
-			// Set as active window
-			$('.window').removeClass('activeWindow');
-			win.addClass('activeWindow');
-
-			// Force z-index update for active window
-			$('.window').css('z-index', 1000);
-			win.css('z-index', 1001);
-
-			// Animate and update taskbar
-			win.one('animationend', function () {
-				win.removeClass('opening');
-			});
-
-			$('#taskbar .taskbarPanel').removeClass('activeTab');
-			$('#taskbar .taskbarPanel').eq(id).removeClass('closed minimizedTab').addClass('activeTab');
-
-			// --- Overflow/scrollbar patch: recalc wincontent height on open ---
-			const content = win.find('.wincontent');
-			content.css('height', 'auto'); // Reset first
-			// Force reflow
-			void content[0].offsetHeight;
-			content.css('height', 'calc(100% - 48px)');
-			// ---------------------------------------------------------------
-		}
-
-		// If Suggestions window is opened, render comments
-		if (win.data('title') === 'Suggestions') {
-			$('#comment-status').text('');
-			renderRecaptcha();
-		}
-	});
-
-	$(document).on('click', '#comment-submit', function () {
-		const username = $('#comment-username').val().trim() || 'Anonymous';
-		const text = $('#comment-text').val().trim();
-		const $status = $('#comment-status');
-		$status.text('');
-
-		if (!text) {
-			$status.text('Please enter a comment.');
-			return;
-		}
-
-		const recaptchaResponse = grecaptcha.getResponse();
-		if (!recaptchaResponse) {
-			$status.text('Please complete the CAPTCHA.');
-			return;
-		}
-
-		$status.text('Sending...');
-		$('#comment-submit').prop('disabled', true);
-
-		// Discord webhooks do not support CORS for browser requests.
-		// To make this work, you must send the request from your own backend server.
-		// The following code will always fail with CORS if run directly in the browser.
-
-		$.ajax({
-			url: DISCORD_WEBHOOK_URL,
-			method: 'POST',
-			contentType: 'application/json',
-			data: JSON.stringify({
-				username: 'Suggestion Bot',
-				embeds: [{
-					title: 'New Suggestion',
-					fields: [
-						{ name: 'User', value: username },
-						{ name: 'Comment', value: text }
-					],
-					timestamp: new Date().toISOString()
-				}]
-			}),
-			success: function () {
-				$status.text('Suggestion sent! Thank you.');
-				$('#comment-text').val('');
-				grecaptcha.reset();
-			},
-			error: function () {
-				$status.text('Failed to send. Please try again later.');
-			},
-			complete: function () {
-				$('#comment-submit').prop('disabled', false);
+	// reCAPTCHA callback functions
+	window.onRecaptchaLoad = function() {
+		const container = document.getElementById('recaptcha-widget');
+		if (container && typeof grecaptcha !== 'undefined') {
+			try {
+				recaptchaWidgetId = grecaptcha.render('recaptcha-widget', {
+					'sitekey': RECAPTCHA_SITE_KEY,
+					'callback': onRecaptchaSuccess,
+					'expired-callback': onRecaptchaExpired,
+					'error-callback': onRecaptchaError,
+					'theme': 'light',
+					'size': 'normal'
+				});
+			} catch (error) {
+				console.error('reCAPTCHA render error:', error);
 			}
+		}
+	};
+
+	function onRecaptchaSuccess(token) {
+		document.getElementById('recaptcha-error').style.display = 'none';
+		updateSubmitButton();
+	}
+
+	function onRecaptchaExpired() {
+		console.log('reCAPTCHA expired');
+		updateSubmitButton();
+	}
+
+	function onRecaptchaError() {
+		console.error('reCAPTCHA error');
+		updateSubmitButton();
+	}
+
+	function updateSubmitButton() {
+		const submitBtn = document.getElementById('submit-suggestion');
+		const form = document.getElementById('suggestion-form');
+		
+		if (!submitBtn || !form) return;
+		
+		const isFormValid = form.checkValidity();
+		
+		let isRecaptchaValid = false;
+		if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
+			try {
+				const response = grecaptcha.getResponse(recaptchaWidgetId);
+				isRecaptchaValid = response && response.length > 0;
+			} catch (error) {
+				console.error('Error checking reCAPTCHA:', error);
+			}
+		}
+		
+		submitBtn.disabled = !(isFormValid && isRecaptchaValid);
+	}
+
+	// Form validation and submission
+	function initializeSuggestionsForm() {
+		const form = document.getElementById('suggestion-form');
+		const inputs = form ? form.querySelectorAll('input, select, textarea') : [];
+		const submitBtn = document.getElementById('submit-suggestion');
+		const cancelBtn = document.getElementById('cancel-suggestion');
+		
+		if (!form) return;
+		
+		// Load reCAPTCHA when suggestions window is opened
+		loadRecaptcha();
+		
+		// Add input event listeners for real-time validation
+		inputs.forEach(input => {
+			input.addEventListener('input', updateSubmitButton);
+			input.addEventListener('change', updateSubmitButton);
 		});
-	});
-
-	// Regenerate captcha when Suggestions window is opened
-	$(document).on('click', '.openWindow', function (e) {
-		// Stop propagation to prevent desktop click handler from firing
-		e.stopPropagation();
-
-		const id = $(this).data('id');
-		const win = $('#window' + id);
-
-		if (!win.is(':visible')) {
-			// Hide any animation classes
-			win.show().removeClass('closing minimizedWindow minimizing closed').addClass('opening');
-
-			// Set as active window
-			$('.window').removeClass('activeWindow');
-			win.addClass('activeWindow');
-
-			// Force z-index update for active window
-			$('.window').css('z-index', 1000);
-			win.css('z-index', 1001);
-
-			// Animate and update taskbar
-			win.one('animationend', function () {
-				win.removeClass('opening');
+		
+		// Form submission
+		form.addEventListener('submit', function(e) {
+			e.preventDefault();
+			
+			// Validate form
+			if (!form.checkValidity()) {
+				form.reportValidity();
+				return;
+			}
+			
+			// Validate reCAPTCHA
+			let recaptchaResponse = '';
+			if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
+				try {
+					recaptchaResponse = grecaptcha.getResponse(recaptchaWidgetId);
+				} catch (error) {
+					console.error('Error getting reCAPTCHA response:', error);
+				}
+			}
+			
+			if (!recaptchaResponse) {
+				document.getElementById('recaptcha-error').style.display = 'block';
+				document.getElementById('recaptcha-error').textContent = 'Please complete the reCAPTCHA verification';
+				return;
+			}
+			
+			// Prepare form data
+			const formData = {
+				name: document.getElementById('suggestion-name').value,
+				email: document.getElementById('suggestion-email').value,
+				type: document.getElementById('suggestion-type').value,
+				suggestion: document.getElementById('suggestion-text').value,
+				recaptcha: recaptchaResponse
+			};
+			
+			// Submit suggestion
+			submitSuggestion(formData);
+		});
+		
+		// Cancel button
+		if (cancelBtn) {
+			cancelBtn.addEventListener('click', function() {
+				closeSuggestionsWindow();
 			});
-
-			$('#taskbar .taskbarPanel').removeClass('activeTab');
-			$('#taskbar .taskbarPanel').eq(id).removeClass('closed minimizedTab').addClass('activeTab');
-
-			// --- Overflow/scrollbar patch: recalc wincontent height on open ---
-			const content = win.find('.wincontent');
-			content.css('height', 'auto'); // Reset first
-			// Force reflow
-			void content[0].offsetHeight;
-			content.css('height', 'calc(100% - 48px)');
-			// ---------------------------------------------------------------
 		}
-
-		// If Suggestions window is opened, render comments
-		if (win.data('title') === 'Suggestions') {
-			$('#comment-status').text('');
-			renderRecaptcha();
+		
+		// Close success message
+		const closeSuccessBtn = document.getElementById('close-success');
+		if (closeSuccessBtn) {
+			closeSuccessBtn.addEventListener('click', function() {
+				closeSuggestionsWindow();
+			});
 		}
-	});
+	}
 
-	
+	function submitSuggestion(formData) {
+		const submitBtn = document.getElementById('submit-suggestion');
+		const originalText = submitBtn.textContent;
+		
+		// Show loading state
+		submitBtn.disabled = true;
+		submitBtn.textContent = 'Submitting...';
+		
+		// Simulate API call (replace with actual endpoint)
+		setTimeout(() => {
+			// For demo purposes, we'll just show success
+			console.log('Suggestion submitted:', formData);
+			
+			// Reset reCAPTCHA
+			if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
+				try {
+					grecaptcha.reset(recaptchaWidgetId);
+				} catch (error) {
+					console.error('Error resetting reCAPTCHA:', error);
+				}
+			}
+			
+			// Show success message
+			showSuccessMessage();
+			
+			// Reset button
+			submitBtn.disabled = false;
+			submitBtn.textContent = originalText;
+			
+		}, 1500);
+	}
+
+	function showSuccessMessage() {
+		document.getElementById('suggestion-form').style.display = 'none';
+		document.getElementById('suggestion-success').style.display = 'block';
+	}
+
+	function closeSuggestionsWindow() {
+		// Reset form
+		const form = document.getElementById('suggestion-form');
+		if (form) {
+			form.reset();
+			form.style.display = 'block';
+		}
+		
+		const successMsg = document.getElementById('suggestion-success');
+		if (successMsg) {
+			successMsg.style.display = 'none';
+		}
+		
+		const errorMsg = document.getElementById('recaptcha-error');
+		if (errorMsg) {
+			errorMsg.style.display = 'none';
+		}
+		
+		// Reset reCAPTCHA
+		if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
+			try {
+				grecaptcha.reset(recaptchaWidgetId);
+			} catch (error) {
+				console.error('Error resetting reCAPTCHA:', error);
+			}
+		}
+		
+		// Close window
+		const window = $('#suggestions-window');
+		window.find('.winclose').trigger('click');
+	}
+
+	// Make functions globally available
+	window.initializeSuggestionsForm = initializeSuggestionsForm;
+	window.onRecaptchaLoad = onRecaptchaLoad;
 });

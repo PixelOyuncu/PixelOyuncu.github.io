@@ -57,7 +57,8 @@ $(function () {
 			}
 		});
 
-		if (win.find('.wincontent').length === 0) {
+		// Wrap content in wincontent if it doesn't already exist
+		if (!win.hasClass('suggestions-window') && win.find('.wincontent').length === 0) {
 			const contents = win.contents().not('.windowHeader');
 			const wrapper = $('<div class="wincontent"></div>').append(contents);
 			win.append(wrapper);
@@ -145,10 +146,12 @@ $(function () {
 
 				// --- Overflow/scrollbar patch: recalc wincontent height on open ---
 				const content = win.find('.wincontent');
-				content.css('height', 'auto'); // Reset first
-				// Force reflow
-				void content[0].offsetHeight;
-				content.css('height', 'calc(100% - 48px)');
+				if (content.length > 0) {
+					content.css('height', 'auto'); // Reset first
+					// Force reflow
+					void content[0].offsetHeight;
+					content.css('height', 'calc(100% - 48px)');
+				}
 				// ---------------------------------------------------------------
 
 				win.one('animationend', function () {
@@ -263,21 +266,21 @@ $(function () {
 
 				// --- Overflow/scrollbar patch: recalc wincontent height on open ---
 				const content = win.find('.wincontent');
-				content.css('height', 'auto'); // Reset first
-				// Force reflow
-				void content[0].offsetHeight;
-				content.css('height', 'calc(100% - 48px)');
+				if (content.length > 0) {
+					content.css('height', 'auto'); // Reset first
+					// Force reflow
+					void content[0].offsetHeight;
+					content.css('height', 'calc(100% - 48px)');
+				}
 				// ---------------------------------------------------------------
 
 				// If Suggestions window is opened, initialize the form
 				if (win.data('title') === 'Suggestions') {
-					initializeSuggestionsForm();
+					setTimeout(initializeSuggestionsForm, 100);
 				}
 			}
 		});
 	});
-
-		// reCAPTCHA functionality for Suggestions window - REMOVED
 
 	// Form validation and submission for suggestions window
 	function initializeSuggestionsForm() {
@@ -336,12 +339,22 @@ $(function () {
 	}
 
 	function updateSubmitButton() {
-		const submitBtn = document.getElementById('submit-suggestion');
 		const form = document.getElementById('suggestion-form');
+		const submitBtn = document.getElementById('submit-suggestion');
 		
 		if (!submitBtn || !form) return;
 		
-		const isFormValid = form.checkValidity();
+		// Check if form is valid
+		const nameInput = document.getElementById('suggestion-name');
+		const typeSelect = document.getElementById('suggestion-type');
+		const textArea = document.getElementById('suggestion-text');
+		
+		const isNameValid = nameInput && nameInput.value.trim().length > 0;
+		const isTypeValid = typeSelect && typeSelect.value !== '';
+		const isTextValid = textArea && textArea.value.trim().length > 0;
+		
+		const isFormValid = isNameValid && isTypeValid && isTextValid;
+		
 		submitBtn.disabled = !isFormValid;
 	}
 
@@ -385,6 +398,9 @@ $(function () {
 		if (successMsg) {
 			successMsg.style.display = 'none';
 		}
+		
+		// Update submit button state after reset
+		updateSubmitButton();
 		
 		// Close window
 		const window = $('#suggestions-window');

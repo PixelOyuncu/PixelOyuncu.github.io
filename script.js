@@ -361,24 +361,49 @@ $(function () {
 	function submitSuggestion(formData) {
 		const submitBtn = document.getElementById('submit-suggestion');
 		const originalText = submitBtn.textContent;
-		
+
 		// Show loading state
 		submitBtn.disabled = true;
 		submitBtn.textContent = 'Submitting...';
-		
-		// Simulate API call (replace with actual endpoint)
-		setTimeout(() => {
-			// For demo purposes, we'll just show success
-			console.log('Suggestion submitted:', formData);
-			
-			// Show success message
-			showSuccessMessage();
-			
-			// Reset button
+
+		// Discord webhook URL (replace with your actual webhook)
+		const DISCORD_WEBHOOK_URL = 'YOUR_DISCORD_WEBHOOK_URL_HERE';
+
+		// Prepare Discord webhook payload
+		const payload = {
+			username: 'Suggestion Bot',
+			embeds: [{
+				title: 'New Suggestion',
+				fields: [
+					{ name: 'Name', value: formData.name || 'Anonymous' },
+					{ name: 'Email', value: formData.email || 'N/A' },
+					{ name: 'Type', value: formData.type || 'N/A' },
+					{ name: 'Suggestion', value: formData.suggestion || '' }
+				],
+				timestamp: new Date().toISOString()
+			}]
+		};
+
+		// Send to Discord webhook
+		fetch(DISCORD_WEBHOOK_URL, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload)
+		})
+		.then(response => {
+			if (response.ok) {
+				showSuccessMessage();
+			} else {
+				alert('Failed to send suggestion. Please try again later.');
+			}
+		})
+		.catch(() => {
+			alert('Failed to send suggestion. Please try again later.');
+		})
+		.finally(() => {
 			submitBtn.disabled = false;
 			submitBtn.textContent = originalText;
-			
-		}, 1500);
+		});
 	}
 
 	function showSuccessMessage() {

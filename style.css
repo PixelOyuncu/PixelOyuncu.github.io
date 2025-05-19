@@ -873,13 +873,6 @@ select {
 	flex-direction: column;
 }
 
-.suggestions-header {
-	background: #ffffff;
-	padding: 32px 32px 24px 32px;
-	border-bottom: 1px solid #f0f0f0;
-	text-align: left;
-}
-
 .suggestions-header h2 {
 	font-size: 24px;
 	font-weight: 600;
@@ -895,9 +888,45 @@ select {
 	line-height: 1.4;
 }
 
+/* Suggestions Window Styling Fixes */
+#suggestions-window {
+    width: 520px;
+    height: 520px; /* Fixed height to prevent jumping */
+    top: 100px;
+    left: 300px;
+}
+
+.suggestions-container {
+    padding: 0;
+    background: #ffffff;
+    border-radius: 0 0 8px 8px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent content from overflowing */
+}
+
+.suggestions-window .wincontent {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 48px); /* Subtract header height */
+}
+
+.suggestions-header {
+    background: #ffffff;
+    padding: 24px 32px 16px 32px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+    flex-shrink: 0; /* Prevent header from shrinking */
+}
+
 .suggestion-form {
-	padding: 32px;
-	flex: 1;
+    padding: 24px 32px;
+    flex: 1;
+    overflow-y: auto; /* Enable scrolling for the form area */
+    overflow-x: hidden;
 }
 
 .form-group {
@@ -1032,14 +1061,15 @@ select {
 }
 
 .success-message {
-	padding: 48px 32px;
-	text-align: center;
-	background: #ffffff;
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
+    padding: 32px;
+    text-align: center;
+    background: #ffffff;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
 }
 
 .success-icon {
@@ -1129,4 +1159,11 @@ select {
 	.form-actions .btn {
 		width: 100%;
 	}
+
+	#suggestions-window {
+        width: 95%;
+        left: 2.5%;
+        top: 40px;
+        height: 80vh; /* Use viewport height for mobile */
+    }
 }

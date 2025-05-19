@@ -43,15 +43,11 @@
 		</div>
 
 		<div class="window" data-title="Suggestions">
-			<!--implement a comment system here with: username, their comment, and upvoting. create another script for handling data if needed.-->
 			<div id="comment-system">
 				<div id="comment-form">
 					<input type="text" id="comment-username" placeholder="Your name" maxlength="20" />
 					<textarea id="comment-text" placeholder="Your comment" maxlength="300"></textarea>
-					<div id="captcha-container">
-						<span id="captcha-question"></span>
-						<input type="text" id="captcha-answer" placeholder="Answer" maxlength="6" style="width:60px;" />
-					</div>
+					<div id="recaptcha-container" style="margin:10px 0;"></div>
 					<button id="comment-submit">Submit</button>
 				</div>
 				<div id="comment-status"></div>
@@ -65,5 +61,6 @@
 			<!-- Desktop icons will be populated by JavaScript -->
 		</div>
 	</div>
+	<script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
 </body>
 </html>

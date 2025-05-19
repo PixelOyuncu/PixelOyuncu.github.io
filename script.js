@@ -266,23 +266,70 @@ $(function () {
 		});
 	});
 
-	// --- Suggestions window: Discord webhook + CAPTCHA ---
-	const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1344414648941678755/IVMRJoLB0oCUgXwmTmwdY-jfRQaEwyk9jse3RtYsDB_yRiD2d7aKZtu9CSl2vYwTO7Wx'; // <-- Replace with your webhook
+	// --- Suggestions window: Discord webhook + reCAPTCHA ---
+	// 1. Add reCAPTCHA widget dynamically when Suggestions window is opened
+	// 2. On submit, verify reCAPTCHA before sending
 
-	function generateCaptcha() {
-		const a = Math.floor(Math.random() * 10) + 1;
-		const b = Math.floor(Math.random() * 10) + 1;
-		$('#captcha-question').text(`What is ${a} + ${b}?`);
-		$('#captcha-answer').val('');
-		return a + b;
+	// Replace this with your own reCAPTCHA site key
+	const RECAPTCHA_SITE_KEY = '6Le48T8rAAAAAKtlygFyFYawzMD5s07FSVgY7LGw';
+
+	// Add reCAPTCHA widget when Suggestions window is opened
+	function renderRecaptcha() {
+		if ($('#recaptcha-container').children().length === 0) {
+			grecaptcha.render('recaptcha-container', {
+				sitekey: RECAPTCHA_SITE_KEY
+			});
+		} else {
+			grecaptcha.reset();
+		}
 	}
 
-	let captchaAnswer = generateCaptcha();
+	$(document).on('click', '.openWindow', function (e) {
+		// Stop propagation to prevent desktop click handler from firing
+		e.stopPropagation();
+
+		const id = $(this).data('id');
+		const win = $('#window' + id);
+
+		if (!win.is(':visible')) {
+			// Hide any animation classes
+			win.show().removeClass('closing minimizedWindow minimizing closed').addClass('opening');
+
+			// Set as active window
+			$('.window').removeClass('activeWindow');
+			win.addClass('activeWindow');
+
+			// Force z-index update for active window
+			$('.window').css('z-index', 1000);
+			win.css('z-index', 1001);
+
+			// Animate and update taskbar
+			win.one('animationend', function () {
+				win.removeClass('opening');
+			});
+
+			$('#taskbar .taskbarPanel').removeClass('activeTab');
+			$('#taskbar .taskbarPanel').eq(id).removeClass('closed minimizedTab').addClass('activeTab');
+
+			// --- Overflow/scrollbar patch: recalc wincontent height on open ---
+			const content = win.find('.wincontent');
+			content.css('height', 'auto'); // Reset first
+			// Force reflow
+			void content[0].offsetHeight;
+			content.css('height', 'calc(100% - 48px)');
+			// ---------------------------------------------------------------
+		}
+
+		// If Suggestions window is opened, render comments
+		if (win.data('title') === 'Suggestions') {
+			$('#comment-status').text('');
+			renderRecaptcha();
+		}
+	});
 
 	$(document).on('click', '#comment-submit', function () {
 		const username = $('#comment-username').val().trim() || 'Anonymous';
 		const text = $('#comment-text').val().trim();
-		const captchaInput = $('#captcha-answer').val().trim();
 		const $status = $('#comment-status');
 		$status.text('');
 
@@ -290,14 +337,19 @@ $(function () {
 			$status.text('Please enter a comment.');
 			return;
 		}
-		if (parseInt(captchaInput, 10) !== captchaAnswer) {
-			$status.text('Incorrect CAPTCHA answer.');
-			captchaAnswer = generateCaptcha();
+
+		const recaptchaResponse = grecaptcha.getResponse();
+		if (!recaptchaResponse) {
+			$status.text('Please complete the CAPTCHA.');
 			return;
 		}
 
 		$status.text('Sending...');
 		$('#comment-submit').prop('disabled', true);
+
+		// Discord webhooks do not support CORS for browser requests.
+		// To make this work, you must send the request from your own backend server.
+		// The following code will always fail with CORS if run directly in the browser.
 
 		$.ajax({
 			url: DISCORD_WEBHOOK_URL,
@@ -317,7 +369,7 @@ $(function () {
 			success: function () {
 				$status.text('Suggestion sent! Thank you.');
 				$('#comment-text').val('');
-				captchaAnswer = generateCaptcha();
+				grecaptcha.reset();
 			},
 			error: function () {
 				$status.text('Failed to send. Please try again later.');
@@ -367,8 +419,10 @@ $(function () {
 
 		// If Suggestions window is opened, render comments
 		if (win.data('title') === 'Suggestions') {
-			captchaAnswer = generateCaptcha();
 			$('#comment-status').text('');
+			renderRecaptcha();
 		}
 	});
+
+	
 });

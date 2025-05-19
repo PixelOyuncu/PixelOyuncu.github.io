@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
 	<meta charset="utf-8">
 	<meta content="ie=edge" http-equiv="x-ua-compatible">
@@ -12,7 +13,8 @@
 	</script>
 	<script src="script.js">
 	</script>
-	<script src="https://www.google.com/recaptcha/enterprise.js?render=6Le48T8rAAAAAKtlygFyFYawzMD5s07FSVgY7LGw"></script>
+	<script
+		src="https://www.google.com/recaptcha/enterprise.js?render=6Le48T8rAAAAAKtlygFyFYawzMD5s07FSVgY7LGw"></script>
 
 	<link href="style.css" rel="stylesheet" type="text/css">
 
@@ -35,31 +37,76 @@
 		</div>
 
 		<div class="window closed" data-title="Simple Tower Defense">
-			<p><b>Simple Tower Defense</b> is a game on <b>Roblox</b> that I have been working on for <b>more than a year</b>. The game is more of a passion project rather than maximizing monetization. If you can, please contribute to the game by <b>presenting me ideas</b> and <b>reporting the issues you find in the game!</b></p>
+			<p><b>Simple Tower Defense</b> is a game on <b>Roblox</b> that I have been working on for <b>more than a
+					year</b>. The game is more of a passion project rather than maximizing monetization. If you can,
+				please contribute to the game by <b>presenting me ideas</b> and <b>reporting the issues you find in the
+					game!</b></p>
 			</p>
 
-			<a target="blank" href="https://www.roblox.com/games/15832826731/BETA-0-52-Simple-Tower-Defense">Click here to check it out!</a>
+			<a target="blank" href="https://www.roblox.com/games/15832826731/BETA-0-52-Simple-Tower-Defense">Click here
+				to check it out!</a>
 		</div>
 
-		<div class="window" data-title="Suggestions">
-			<div id="comment-system">
-				<div id="comment-form">
-					<input type="text" id="comment-username" placeholder="Your name" maxlength="20" />
-					<textarea id="comment-text" placeholder="Your comment" maxlength="300"></textarea>
-					<div id="recaptcha-container" style="margin:10px 0;"></div>
-					<button id="comment-submit">Submit</button>
+		<div class="window closed" data-title="Suggestions" id="suggestions-window">
+			<div class="suggestions-container">
+				<div class="suggestions-header">
+					<h2>Submit Your Suggestion</h2>
+					<p>Help us improve by sharing your ideas!</p>
 				</div>
-				<div id="comment-status"></div>
+
+				<form id="suggestion-form" class="suggestion-form">
+					<div class="form-group">
+						<label for="suggestion-name">Your Name</label>
+						<input type="text" id="suggestion-name" name="name" required placeholder="Enter your name">
+					</div>
+
+					<div class="form-group">
+						<label for="suggestion-email">Email (Optional)</label>
+						<input type="email" id="suggestion-email" name="email" placeholder="your.email@example.com">
+					</div>
+
+					<div class="form-group">
+						<label for="suggestion-type">Suggestion Type</label>
+						<select id="suggestion-type" name="type" required>
+							<option value="">Select a category</option>
+							<option value="feature">New Feature</option>
+							<option value="improvement">Improvement</option>
+							<option value="bug">Bug Report</option>
+							<option value="ui">UI/UX Enhancement</option>
+							<option value="other">Other</option>
+						</select>
+					</div>
+
+					<div class="form-group">
+						<label for="suggestion-text">Your Suggestion</label>
+						<textarea id="suggestion-text" name="suggestion" required
+							placeholder="Describe your suggestion in detail..." rows="5"></textarea>
+					</div>
+
+					<div class="recaptcha-container">
+						<div id="recaptcha-widget"></div>
+						<div id="recaptcha-error" class="error-message" style="display: none;">
+							Please complete the reCAPTCHA verification
+						</div>
+					</div>
+
+					<div class="form-actions">
+						<button type="button" id="cancel-suggestion" class="btn btn-secondary">Cancel</button>
+						<button type="submit" id="submit-suggestion" class="btn btn-primary" disabled>Submit
+							Suggestion</button>
+					</div>
+				</form>
+
+				<div id="suggestion-success" class="success-message" style="display: none;">
+					<div class="success-icon">✓</div>
+					<h3>Thank you for your suggestion!</h3>
+					<p>We appreciate your feedback and will review it carefully.</p>
+					<button type="button" id="close-success" class="btn btn-primary">Close</button>
+				</div>
 			</div>
-		</div>
-
-		<div id="taskbar">
-		</div>
-
-		<div id="icons">
-			<!-- Desktop icons will be populated by JavaScript -->
 		</div>
 	</div>
 	<script src="https://www.google.com/recaptcha/api.js?render=explicit" async defer></script>
 </body>
+
 </html>

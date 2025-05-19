@@ -275,18 +275,19 @@ $(function () {
 
 	// Add reCAPTCHA widget when Suggestions window is opened
 	function renderRecaptcha() {
+		// Remove any previous widget to avoid "No reCAPTCHA clients exist" error
+		$('#recaptcha-container').empty();
 		// Wait until grecaptcha is loaded
-		if (typeof grecaptcha === 'undefined' || !grecaptcha.render) {
-			setTimeout(renderRecaptcha, 200);
-			return;
-		}
-		if ($('#recaptcha-container').children().length === 0) {
+		function tryRender() {
+			if (typeof grecaptcha === 'undefined' || !grecaptcha.render) {
+				setTimeout(tryRender, 200);
+				return;
+			}
 			grecaptcha.render('recaptcha-container', {
 				sitekey: RECAPTCHA_SITE_KEY
 			});
-		} else {
-			grecaptcha.reset();
 		}
+		tryRender();
 	}
 
 	$(document).on('click', '.openWindow', function (e) {

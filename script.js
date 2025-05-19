@@ -277,79 +277,9 @@ $(function () {
 		});
 	});
 
-	// reCAPTCHA functionality for Suggestions window
-	const RECAPTCHA_SITE_KEY = '6Le48T8rAAAAAKtlygFyFYawzMD5s07FSVgY7LGw';
-	let recaptchaLoaded = false;
-	let recaptchaWidgetId = null;
+		// reCAPTCHA functionality for Suggestions window - REMOVED
 
-	// Load reCAPTCHA script
-	function loadRecaptcha() {
-		if (recaptchaLoaded) return;
-		
-		const script = document.createElement('script');
-		script.src = 'https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit';
-		script.async = true;
-		script.defer = true;
-		document.head.appendChild(script);
-		recaptchaLoaded = true;
-	}
-
-	// reCAPTCHA callback functions
-	window.onRecaptchaLoad = function() {
-		const container = document.getElementById('recaptcha-widget');
-		if (container && typeof grecaptcha !== 'undefined') {
-			try {
-				recaptchaWidgetId = grecaptcha.render('recaptcha-widget', {
-					'sitekey': RECAPTCHA_SITE_KEY,
-					'callback': onRecaptchaSuccess,
-					'expired-callback': onRecaptchaExpired,
-					'error-callback': onRecaptchaError,
-					'theme': 'light',
-					'size': 'normal'
-				});
-			} catch (error) {
-				console.error('reCAPTCHA render error:', error);
-			}
-		}
-	};
-
-	function onRecaptchaSuccess(token) {
-		document.getElementById('recaptcha-error').style.display = 'none';
-		updateSubmitButton();
-	}
-
-	function onRecaptchaExpired() {
-		console.log('reCAPTCHA expired');
-		updateSubmitButton();
-	}
-
-	function onRecaptchaError() {
-		console.error('reCAPTCHA error');
-		updateSubmitButton();
-	}
-
-	function updateSubmitButton() {
-		const submitBtn = document.getElementById('submit-suggestion');
-		const form = document.getElementById('suggestion-form');
-		
-		if (!submitBtn || !form) return;
-		
-		const isFormValid = form.checkValidity();
-		
-		let isRecaptchaValid = false;
-		if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
-			try {
-				const response = grecaptcha.getResponse(recaptchaWidgetId);
-				isRecaptchaValid = response && response.length > 0;
-			} catch (error) {
-				console.error('Error checking reCAPTCHA:', error);
-			}
-		}
-		
-		submitBtn.disabled = !(isFormValid && isRecaptchaValid);
-	}
-
-	// Form validation and submission
+	// Form validation and submission for suggestions window
 	function initializeSuggestionsForm() {
 		const form = document.getElementById('suggestion-form');
 		const inputs = form ? form.querySelectorAll('input, select, textarea') : [];
@@ -358,14 +288,14 @@ $(function () {
 		
 		if (!form) return;
 		
-		// Load reCAPTCHA when suggestions window is opened
-		loadRecaptcha();
-		
 		// Add input event listeners for real-time validation
 		inputs.forEach(input => {
 			input.addEventListener('input', updateSubmitButton);
 			input.addEventListener('change', updateSubmitButton);
 		});
+		
+		// Initial button state update
+		updateSubmitButton();
 		
 		// Form submission
 		form.addEventListener('submit', function(e) {
@@ -377,29 +307,12 @@ $(function () {
 				return;
 			}
 			
-			// Validate reCAPTCHA
-			let recaptchaResponse = '';
-			if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
-				try {
-					recaptchaResponse = grecaptcha.getResponse(recaptchaWidgetId);
-				} catch (error) {
-					console.error('Error getting reCAPTCHA response:', error);
-				}
-			}
-			
-			if (!recaptchaResponse) {
-				document.getElementById('recaptcha-error').style.display = 'block';
-				document.getElementById('recaptcha-error').textContent = 'Please complete the reCAPTCHA verification';
-				return;
-			}
-			
 			// Prepare form data
 			const formData = {
 				name: document.getElementById('suggestion-name').value,
 				email: document.getElementById('suggestion-email').value,
 				type: document.getElementById('suggestion-type').value,
-				suggestion: document.getElementById('suggestion-text').value,
-				recaptcha: recaptchaResponse
+				suggestion: document.getElementById('suggestion-text').value
 			};
 			
 			// Submit suggestion
@@ -422,6 +335,16 @@ $(function () {
 		}
 	}
 
+	function updateSubmitButton() {
+		const submitBtn = document.getElementById('submit-suggestion');
+		const form = document.getElementById('suggestion-form');
+		
+		if (!submitBtn || !form) return;
+		
+		const isFormValid = form.checkValidity();
+		submitBtn.disabled = !isFormValid;
+	}
+
 	function submitSuggestion(formData) {
 		const submitBtn = document.getElementById('submit-suggestion');
 		const originalText = submitBtn.textContent;
@@ -434,15 +357,6 @@ $(function () {
 		setTimeout(() => {
 			// For demo purposes, we'll just show success
 			console.log('Suggestion submitted:', formData);
-			
-			// Reset reCAPTCHA
-			if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
-				try {
-					grecaptcha.reset(recaptchaWidgetId);
-				} catch (error) {
-					console.error('Error resetting reCAPTCHA:', error);
-				}
-			}
 			
 			// Show success message
 			showSuccessMessage();
@@ -472,20 +386,6 @@ $(function () {
 			successMsg.style.display = 'none';
 		}
 		
-		const errorMsg = document.getElementById('recaptcha-error');
-		if (errorMsg) {
-			errorMsg.style.display = 'none';
-		}
-		
-		// Reset reCAPTCHA
-		if (typeof grecaptcha !== 'undefined' && recaptchaWidgetId !== null) {
-			try {
-				grecaptcha.reset(recaptchaWidgetId);
-			} catch (error) {
-				console.error('Error resetting reCAPTCHA:', error);
-			}
-		}
-		
 		// Close window
 		const window = $('#suggestions-window');
 		window.find('.winclose').trigger('click');
@@ -493,5 +393,4 @@ $(function () {
 
 	// Make functions globally available
 	window.initializeSuggestionsForm = initializeSuggestionsForm;
-	window.onRecaptchaLoad = onRecaptchaLoad;
 });

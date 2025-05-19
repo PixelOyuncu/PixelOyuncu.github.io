@@ -275,6 +275,11 @@ $(function () {
 
 	// Add reCAPTCHA widget when Suggestions window is opened
 	function renderRecaptcha() {
+		// Wait until grecaptcha is loaded
+		if (typeof grecaptcha === 'undefined' || !grecaptcha.render) {
+			setTimeout(renderRecaptcha, 200);
+			return;
+		}
 		if ($('#recaptcha-container').children().length === 0) {
 			grecaptcha.render('recaptcha-container', {
 				sitekey: RECAPTCHA_SITE_KEY

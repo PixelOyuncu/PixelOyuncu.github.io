@@ -267,7 +267,7 @@ $(function () {
 	});
 
 	// --- Suggestions window: Discord webhook + CAPTCHA ---
-	const DISCORD_WEBHOOK_URL = 'YOUR_DISCORD_WEBHOOK_URL_HERE'; // <-- Replace with your webhook
+	const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1344414648941678755/IVMRJoLB0oCUgXwmTmwdY-jfRQaEwyk9jse3RtYsDB_yRiD2d7aKZtu9CSl2vYwTO7Wx'; // <-- Replace with your webhook
 
 	function generateCaptcha() {
 		const a = Math.floor(Math.random() * 10) + 1;

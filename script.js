@@ -367,7 +367,7 @@ $(function () {
 		submitBtn.textContent = 'Submitting...';
 
 		// Backend endpoint that will forward to Discord webhook (replace with your actual backend URL)
-		const BACKEND_SUGGESTION_ENDPOINT = 'http://34.155.220.110:3000';
+		const BACKEND_SUGGESTION_ENDPOINT = 'https://34.155.220.110:3000';
 
 		// Prepare payload for backend
 		const payload = {

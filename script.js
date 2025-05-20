@@ -367,7 +367,7 @@ $(function () {
 		submitBtn.textContent = 'Submitting...';
 
 		// Backend endpoint that will forward to Discord webhook (replace with your actual backend URL)
-		const BACKEND_SUGGESTION_ENDPOINT = 'postgresql://neondb_owner:npg_ZlmY9BRi0jnJ@ep-wispy-shape-a2yrjn8t-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require';
+		const BACKEND_SUGGESTION_ENDPOINT = 'http://34.155.220.110:3000';
 
 		// Prepare payload for backend
 		const payload = {

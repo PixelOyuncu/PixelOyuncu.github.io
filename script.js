@@ -366,26 +366,19 @@ $(function () {
 		submitBtn.disabled = true;
 		submitBtn.textContent = 'Submitting...';
 
-		// Discord webhook URL (replace with your actual webhook)
-		const DISCORD_WEBHOOK_URL = '';
+		// Backend endpoint that will forward to Discord webhook (replace with your actual backend URL)
+		const BACKEND_SUGGESTION_ENDPOINT = 'postgresql://neondb_owner:npg_ZlmY9BRi0jnJ@ep-wispy-shape-a2yrjn8t-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require';
 
-		// Prepare Discord webhook payload
+		// Prepare payload for backend
 		const payload = {
-			username: 'Suggestion Bot',
-			embeds: [{
-				title: 'New Suggestion',
-				fields: [
-					{ name: 'Name', value: formData.name || 'Anonymous' },
-					{ name: 'Email', value: formData.email || 'N/A' },
-					{ name: 'Type', value: formData.type || 'N/A' },
-					{ name: 'Suggestion', value: formData.suggestion || '' }
-				],
-				timestamp: new Date().toISOString()
-			}]
+			name: formData.name || 'Anonymous',
+			email: formData.email || 'N/A',
+			type: formData.type || 'N/A',
+			suggestion: formData.suggestion || ''
 		};
 
-		// Send to Discord webhook
-		fetch(DISCORD_WEBHOOK_URL, {
+		// Send to backend server (which should forward to Discord webhook)
+		fetch(BACKEND_SUGGESTION_ENDPOINT, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(payload)

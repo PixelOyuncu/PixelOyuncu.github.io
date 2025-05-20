@@ -367,7 +367,7 @@ $(function () {
 		submitBtn.textContent = 'Submitting...';
 
 		// Discord webhook URL (replace with your actual webhook)
-		const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1344414648941678755/IVMRJoLB0oCUgXwmTmwdY-jfRQaEwyk9jse3RtYsDB_yRiD2d7aKZtu9CSl2vYwTO7Wx';
+		const DISCORD_WEBHOOK_URL = '';
 
 		// Prepare Discord webhook payload
 		const payload = {
